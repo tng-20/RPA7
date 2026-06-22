@@ -1,11 +1,16 @@
 import machine, utime, json
-from phew import server, connect_to_wifi
+import network
+from phew import server, connect_to_wifi, get_ip_address
 from picozero import pico_led
 
-NETWORK = ("VM3222401", "hn7HrhvvMyvb")
+SSID = "terence"
+PASS = "1616hh^**^"
 
-ip = connect_to_wifi(NETWORK[0], NETWORK[1])
-print(ip)
+connect_to_wifi(SSID, PASS)
+wlan = network.WLAN(network.STA_IF)
+print("connected:", wlan.isconnected())
+print("config:", wlan.ifconfig())
+print(get_ip_address())
 
 def digital(data: ADC):
     return True if data.read_u16() > 5000 else False
@@ -31,5 +36,9 @@ def getData(request):
     period = (last - first)/1000000000
     pico_led.off()
     return json.dumps({"period": period}), 200, {"Content-Type": "application/json"}
+
+@server.route("/api/ping", methods=["GET"])
+def ping(request):
+    return "okay"
                 
 server.run()
